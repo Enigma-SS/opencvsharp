@@ -45,7 +45,6 @@ CVAPI(ExceptionStatus) face_FaceRecognizer_predict2(
     obj->predict(*src, *label, *confidence);
     END_WRAP
 }
-
 CVAPI(ExceptionStatus) face_FaceRecognizer_write1(cv::face::FaceRecognizer *obj, const char *filename)
 {
     BEGIN_WRAP
@@ -236,6 +235,29 @@ CVAPI(ExceptionStatus) face_Ptr_FisherFaceRecognizer_delete(cv::Ptr<cv::face::Fi
     END_WRAP
 }
 
+CVAPI(ExceptionStatus) face_FisherFaceRecognizer_predictTopK(cv::face::FisherFaceRecognizer* obj, cv::_InputArray* src, int** labels, double** confidence, int* count)
+{
+    BEGIN_WRAP
+    std::map<int, double> mapResults = obj->predict_all(*src);
+    // setup size / count variable
+    *count = (int)mapResults.size();
+    // allocate memory for output variables
+    int* local_labels = (int*)malloc((*count) * sizeof(int));
+    double* local_confidence = (double*)malloc((*count) * sizeof(double));
+    // iterate over the map and populate arrays
+    long iterator_index = 0;
+    std::map<int, double>::iterator it;
+    for (it = mapResults.begin(); it != mapResults.end(); it++)
+    {
+        local_labels[iterator_index] = (int)it->first;
+        local_confidence[iterator_index] = (double)it->second;
+        iterator_index++;
+    }
+    *count = iterator_index;
+    *labels = local_labels;
+    *confidence = local_confidence;
+    END_WRAP
+}
 #pragma endregion 
 
 #pragma region LBPHFaceRecognizer
@@ -346,6 +368,30 @@ CVAPI(ExceptionStatus) face_Ptr_LBPHFaceRecognizer_delete(cv::Ptr<cv::face::LBPH
 {
     BEGIN_WRAP
     delete obj;
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) face_LBPHFaceRecognizer_predictTopK(cv::face::LBPHFaceRecognizer* obj, cv::_InputArray* src, int** labels, double** confidence, int* count)
+{
+    BEGIN_WRAP
+    std::map<int, double> mapResults = obj->predict_all(*src);
+    // setup size / count variable
+    *count = (int)mapResults.size();
+    // allocate memory for output variables
+    int* local_labels = (int*)malloc((*count) * sizeof(int));
+    double* local_confidence = (double*)malloc((*count) * sizeof(double));
+    // iterate over the map and populate arrays
+    long iterator_index = 0;
+    std::map<int, double>::iterator it;
+    for (it = mapResults.begin(); it != mapResults.end(); it++)
+    {
+        local_labels[iterator_index] = (int)it->first;
+        local_confidence[iterator_index] = (double)it->second;
+        iterator_index++;
+    }
+    *count = iterator_index;
+    *labels = local_labels;
+    *confidence = local_confidence;
     END_WRAP
 }
 

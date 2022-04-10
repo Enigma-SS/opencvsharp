@@ -30,7 +30,6 @@ namespace OpenCvSharp.Internal
         [Pure, DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus face_FaceRecognizer_predict2(
             IntPtr obj, IntPtr src, out int label, out double confidence);
-
         [Pure, DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus face_FaceRecognizer_write1(
             IntPtr obj, [MarshalAs(UnmanagedType.LPStr)] string filename);
@@ -115,11 +114,14 @@ namespace OpenCvSharp.Internal
         [Pure, DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus face_Ptr_FisherFaceRecognizer_delete(IntPtr obj);
 
+        [Pure, DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus face_FisherFaceRecognizer_predictTopK(IntPtr obj, IntPtr src, out IntPtr labels, out IntPtr distance, out int count);
+        
         #endregion
 
         #region LBPHFaceRecognizer
 
-        [Pure, DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+                [Pure, DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus face_LBPHFaceRecognizer_create(
             int radius, int neighbors, int gridX, int gridY, double threshold, out IntPtr returnValue);
 
@@ -165,6 +167,9 @@ namespace OpenCvSharp.Internal
 
         [Pure, DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus face_Ptr_LBPHFaceRecognizer_delete(IntPtr obj);
+
+        [Pure, DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus face_LBPHFaceRecognizer_predictTopK(IntPtr obj, IntPtr src, out IntPtr labels, out IntPtr distance, out int count);
 
         #endregion
     }

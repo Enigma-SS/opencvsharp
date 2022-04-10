@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Runtime.InteropServices;
 using OpenCvSharp.Internal;
 using OpenCvSharp.Internal.Vectors;
 
@@ -226,6 +230,57 @@ namespace OpenCvSharp.Face
                 NativeMethods.face_LBPHFaceRecognizer_getLabels(ptr, result.CvPtr));
             GC.KeepAlive(this);
             return result;
+        }
+
+        /// <summary>
+        /// Gets a prediction from a FaceRecognizer.
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="topK"></param>
+        /// <param name="confidence_threshold"></param>
+        /// <returns></returns>
+        public virtual OrderedDictionary PredictTopK(InputArray src, int topK, double disMax = 500, double simMax = 100)
+        {
+            ThrowIfDisposed();
+            if (src == null)
+                throw new ArgumentNullException(nameof(src));
+            src.ThrowIfDisposed();
+            NativeMethods.HandleException(
+                NativeMethods.face_LBPHFaceRecognizer_predictTopK(ptr, src.CvPtr, out IntPtr _lbls, out IntPtr _dist, out int count));
+            GC.KeepAlive(this);
+            GC.KeepAlive(src);
+            // check if value for topK is valid or not
+            if (count < topK || topK == 0)
+                throw new ArgumentException("Invalid value for topK, values must be <= # of classes and > 0");
+            // assign memory the the output variables
+            int[] labels = new int[count];
+            double[] confidence = new double[count];
+            // copy all results to the output arrays
+            Marshal.Copy(_lbls, labels, 0, count);
+            Marshal.Copy(_dist, confidence, 0, count);
+            // create the dictionary
+            Dictionary<int, double> all_data = new Dictionary<int, double>();
+            // loop through the obtained results and return values
+            for (int i = 0; i < count; i++)
+            {
+                all_data.Add(labels[i], Math.Abs(confidence[i]));
+            }
+            // setup output dictionary with sorted values
+            OrderedDictionary orderedDictionary = new OrderedDictionary();
+            foreach (KeyValuePair<int, double> item in all_data.OrderBy(key => key.Value))
+            {
+                double itValue = item.Value;
+                if (itValue > disMax) itValue = disMax;
+                double sim = simMax - (simMax / disMax * Math.Abs(itValue));
+                // insert it into an ordered dictionary
+                orderedDictionary.Add(item.Key, sim);
+                // update counter
+                topK--;
+                // check if it is time to break
+                if (topK == 0) break;
+            }
+            // return the value of topK sorted values
+            return orderedDictionary;
         }
 
         #endregion
